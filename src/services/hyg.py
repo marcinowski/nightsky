@@ -19,21 +19,22 @@ HYG_GZIP_PATH = os.path.join(os.path.dirname(settings.BASE_DIR), 'resources', HY
 HYG_CSV_PATH = os.path.join(os.path.dirname(settings.BASE_DIR), 'resources', HYG_CSV_FILE)
 
 
-class GetHYGData(object):
-
-    def download_gz(self):
+class HYGService(object):
+    @classmethod
+    def download_gz(cls):
         with requests.get(HYG_RESOURCE_URL, stream=True) as r, open(HYG_GZIP_PATH, 'wb') as f:
             shutil.copyfileobj(r.raw, f)
 
-    def unpack_gz(self):
+    @classmethod
+    def unpack_gz(cls):
         if not os.path.isfile(HYG_GZIP_PATH):
             raise OSError
         with gzip.open(HYG_GZIP_PATH, 'rb') as _gzip, open(HYG_CSV_PATH, 'w') as _csv:
             for line in _gzip:
                 _csv.write(line.decode('utf-8'))
 
-    def parse_csv(self):
+    @classmethod
+    def parse_csv(cls):
         with open(HYG_CSV_PATH, 'r') as _csv:
-            dict_r = csv.DictReader(_csv)
-            result = [el for el in dict_r]
-        return result
+            for line in csv.DictReader(_csv):
+                yield line

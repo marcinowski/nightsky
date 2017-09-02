@@ -10,7 +10,13 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
+import environ
 import os
+
+# https://django-environ.readthedocs.io/en/latest/
+
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,17 +26,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'e$u#w2ves0e(-v-5cek0ccf4-^*=sy1*sz$=bsqxq38)c9j(4t'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = []
 
 
 # Application definition
 
-INSTALLED_APPS = [
+BUILT_IN_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,6 +45,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 ]
 
+EXTERNAL_APPS = [
+    'rest_framework',
+    'django_extensions',
+]
+
+MY_APPS = [
+    'stars',
+]
+
+INSTALLED_APPS = BUILT_IN_APPS + EXTERNAL_APPS + MY_APPS
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -74,10 +90,7 @@ WSGI_APPLICATION = 'nightsky.wsgi.application'
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    'default': env.db()
 }
 
 
@@ -118,3 +131,44 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+
+LOGGING_PATH = os.path.join(os.path.dirname(BASE_DIR), 'logs')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[%(levelname)s] %(asctime)s %(pathname)s %(message)s',
+            'datefmt': '%Y/%m/%d %H:%M:%S'
+        },
+        'medium': {
+            'format': '[%(levelname)s] %(asctime)s %(pathname)s %(message)s',
+            'datefmt': '%Y/%m/%d %H:%M:%S'
+        },
+        'simple': {
+            'format': '[%(levelname)s] %(message)s'
+        },
+    },
+    'handlers': {
+        'fill_db_debug': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'formatter': 'medium',
+            'filename': os.path.join(LOGGING_PATH, 'fill_db_debug.log'),
+        },
+        'fill_db_info': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'formatter': 'medium',
+            'filename': os.path.join(LOGGING_PATH, 'fill_db_info.log'),
+        },
+    },
+    'loggers': {
+        'fill_db': {
+            'handlers': ['fill_db_debug', 'fill_db_info'],
+            'level': 'DEBUG',
+        },
+    },
+}
+
