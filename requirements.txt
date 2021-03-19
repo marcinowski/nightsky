@@ -5,7 +5,7 @@ django-environ==0.4.4
 django-extensions==1.9.0
 django-filter==1.0.4
 django-test-plus==1.0.18
-djangorestframework==3.6.4
+djangorestframework==3.11.2
 graphene==1.4.1
 graphql-core==1.1
 graphql-relay==0.4.5
